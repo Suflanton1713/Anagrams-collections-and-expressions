@@ -34,7 +34,7 @@ package object Anagramas {
   }
 
   def complemento(lOc: Ocurrencias, sLoc: Ocurrencias): Ocurrencias = {
-    // usar recursión de cola
+    // usar recursión de cola s
     ???
   }
 
