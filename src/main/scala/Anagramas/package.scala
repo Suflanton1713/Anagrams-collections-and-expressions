@@ -9,28 +9,44 @@ package object Anagramas {
   )
 
   def lOcPal(p: Palabra): Ocurrencias = {
-    // usar groupBy, map, ...
-    ???
+    p.toList
+          .groupBy(c => c)
+          .map{case (letra, ocurrencia) => (letra,ocurrencia.length)}
+          .toList;
+
+    /*(for {(letra, ocurrencia) <- p.toList.groupBy(c => c)} yield (letra, ocurrencia.length)).toList
+     */
   }
 
   def lOcFrase(f: Frase): Ocurrencias = {
     // usar lOcPal, mkString, ...
-    ???
+    lOcPal(f.mkString)
   }
 
   lazy val diccionarioPorOcurrencias: Map[Ocurrencias, List[Palabra]] = {
     // usar groupBy, lOcPal, ...
-    ???
+    diccionario.groupBy(lOcPal)
   }
 
   def anagramasDePalabra(palabra: Palabra): List[Palabra] = {
     // usar diccionarioPorOcurrencias.get, lOcPal
-    ???
+    diccionarioPorOcurrencias.getOrElse(lOcPal(palabra), Nil);
   }
 
   def combinaciones(locurrencias: Ocurrencias): List[Ocurrencias] = {
     // usar una expresión for para producir el resultado
-    ???
+      ocurrencias.foldLeft(List(List.empty[(Char, Int)])) {
+        case (combisPrevias, (caracter, cantidad)) =>
+          for {
+            combinacion <- combisPrevias
+            n <- 0 to cantidad
+          } yield {
+            if (n == 0) combinacion
+            else combinacion :+ (caracter, n)
+          }
+      }
+    }
+
   }
 
   def complemento(lOc: Ocurrencias, sLoc: Ocurrencias): Ocurrencias = {
