@@ -52,7 +52,7 @@ package object Anagramas {
   def complemento(lOc: Ocurrencias, slOc: Ocurrencias): Ocurrencias = {
     // usar recursión de cola
     @tailrec
-    def loop(restantes: Ocurrencias, acumulador: Ocurrencias): Ocurrencias = restantes match {
+    def compIter(restantes: Ocurrencias, acumulador: Ocurrencias): Ocurrencias = restantes match {
       case Nil => acumulador.reverse
       case (char, cantidad) :: tail =>
         val cantidadUsada = slOc.filter(_._1 == char).headOption.map(_._2).getOrElse(0)
@@ -61,10 +61,10 @@ package object Anagramas {
         val nuevoAcumulador =
           if (nuevaCantidad > 0) (char, nuevaCantidad) :: acumulador
           else acumulador
-        loop(tail, nuevoAcumulador)
+        compIter(tail, nuevoAcumulador)
     }
 
-    loop(lOc, Nil)
+    compIter(lOc, Nil)
 
   }
 
@@ -72,27 +72,24 @@ package object Anagramas {
 
   def anagramasDeFrase(sentence: Frase): List[Frase] = {
     // usar expresiones for y funciones auxiliares
-    val ocurrenciasFrase = lOcFrase(sentence)
-
-    // Función auxiliar para transformar ocurrencias en una palabra cualquiera con esas letras
     def ocurrenciasAString(oc: Ocurrencias): Palabra = {
-      oc.flatMap { case (char, count) =>
-        (1 to count).map(_ => char)
-      }.mkString
-    }
+      val letrasRepetidas = for {
+        (letra, cantidad) <- oc
+        i <- 1 to cantidad
+      } yield letra
 
-    // Función recursiva que genera todos los anagramas posibles
+      letrasRepetidas.mkString
+    }
     def aux(oc: Ocurrencias): List[Frase] = {
       if (oc.isEmpty) List(Nil)
       else {
         for {
           sub <- combinaciones(oc) if sub.nonEmpty
-          palabra <- anagramasDePalabra(ocurrenciasAString(sub)) // usamos la función anagramasDePalabra
+          palabra <- anagramasDePalabra(ocurrenciasAString(sub))
           resto <- aux(complemento(oc, sub))
         } yield palabra :: resto
       }
     }
-
-    aux(ocurrenciasFrase)
+    aux(lOcFrase(sentence))
   }
 }
