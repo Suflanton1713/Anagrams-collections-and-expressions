@@ -35,27 +35,25 @@ package object Anagramas {
 
   def combinaciones(locurrencias: Ocurrencias): List[Ocurrencias] = {
     // usar una expresión for para producir el resultado
-      ocurrencias.foldLeft(List(List.empty[(Char, Int)])) {
+      locurrencias.foldLeft(List(List.empty[(Char, Int)])) {
         case (combisPrevias, (caracter, cantidad)) =>
           for {
             combinacion <- combisPrevias
             n <- 0 to cantidad
           } yield {
             if (n == 0) combinacion
-            else combinacion :+ (caracter, n)
-          }
+            else (caracter, n) :: combinacion
+          } 
       }
     }
 
-  }
-
-  def complemento(lOc: Ocurrencias, sLoc: Ocurrencias): Ocurrencias = {
-    // usar recursión de cola
-    ???
-  }
-
-  def anagramasDeFrase(sentence: Frase): List[Frase] = {
-    // usar expresiones for y funciones auxiliares
-    ???
-  }
+//  def complemento(lOc: Ocurrencias, sLoc: Ocurrencias): Ocurrencias = {
+//    // usar recursión de cola
+//
+//  }
+//
+//  def anagramasDeFrase(sentence: Frase): List[Frase] = {
+//    // usar expresiones for y funciones auxiliares
+//
+//  }
 }
