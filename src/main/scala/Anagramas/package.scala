@@ -11,12 +11,13 @@ package object Anagramas {
   )
 
   def lOcPal(p: Palabra): Ocurrencias = {
-    // usar groupBy, map, ...
-    val agrupadas:Map[Char, String] = p.groupBy((letra: Char) => letra) //internamente es como si hiciera p.toList.groupBy
-    val conteo: Map[Char, Int] = agrupadas.map { case (letra, stringDeLetras) =>
-      (letra, stringDeLetras.length)
-    }
-    conteo.toList
+    p.toList
+          .groupBy(c => c)
+          .map{case (letra, ocurrencia) => (letra,ocurrencia.length)}
+          .toList;
+
+    /*(for {(letra, ocurrencia) <- p.toList.groupBy(c => c)} yield (letra, ocurrencia.length)).toList
+     */
   }
 
   def lOcFrase(f: Frase): Ocurrencias = {
@@ -26,43 +27,72 @@ package object Anagramas {
 
   lazy val diccionarioPorOcurrencias: Map[Ocurrencias, List[Palabra]] = {
     // usar groupBy, lOcPal, ...
-    diccionario.groupBy((pal: Palabra) => lOcPal(pal))
+    diccionario.groupBy(lOcPal)
   }
 
   def anagramasDePalabra(palabra: Palabra): List[Palabra] = {
     // usar diccionarioPorOcurrencias.get, lOcPal
-    diccionarioPorOcurrencias.getOrElse(lOcPal(palabra), Nil)
+    diccionarioPorOcurrencias.getOrElse(lOcPal(palabra), Nil);
   }
 
-  def combinaciones(locurrencias: Ocurrencias): List[Ocurrencias] = locurrencias match {
-    case Nil => List(Nil)  // Caso base: la única combinación es la lista vacía
-    case (c,n) :: tail =>
-
-      val restoCombinaciones = combinaciones(tail)// Genera las combinaciones para el resto (recursión)
-
-      (for {
-        sublista <- restoCombinaciones
-        k <- 1 to n
-      } yield (c, k) :: sublista) ++ restoCombinaciones // Para cada sublista del resto, añade el carácter actual con k=1 hasta maxFrec
-  }
-
-  def complemento( lOc: Ocurrencias,  slOc : Ocurrencias): Ocurrencias = {
-    // usar recursión de cola s
-    @tailrec
-    def comp(LOc: Ocurrencias, sLoc: Ocurrencias, acc: Ocurrencias): Ocurrencias = LOc match {
-      case Nil => acc
-      case (char, n) :: tail =>
-        val cantidadUsada = slOc.find(_._1 == char).map(_._2).getOrElse(0)
-        val nuevaCantidad = n - cantidadUsada
-        val nuevoAcc = if (nuevaCantidad > 0) (char, nuevaCantidad) :: acc else acc
-        comp(tail, slOc, nuevoAcc)
+  def combinaciones(locurrencias: Ocurrencias): List[Ocurrencias] = {
+    // usar una expresión for para producir el resultado
+      locurrencias.foldLeft(List(List.empty[(Char, Int)])) {
+        case (combisPrevias, (caracter, cantidad)) =>
+          for {
+            combinacion <- combisPrevias
+            n <- 0 to cantidad
+          } yield {
+            if (n == 0) combinacion
+            else (caracter, n) :: combinacion
+          } 
+      }
     }
 
-    comp(lOc, slOc, Nil)
+  def complemento(lOc: Ocurrencias, slOc: Ocurrencias): Ocurrencias = {
+    // usar recursión de cola
+    @tailrec
+    def loop(restantes: Ocurrencias, acumulador: Ocurrencias): Ocurrencias = restantes match {
+      case Nil => acumulador.reverse
+      case (char, cantidad) :: tail =>
+        val cantidadUsada = slOc.filter(_._1 == char).headOption.map(_._2).getOrElse(0)
+        val nuevaCantidad = cantidad - cantidadUsada
+
+        val nuevoAcumulador =
+          if (nuevaCantidad > 0) (char, nuevaCantidad) :: acumulador
+          else acumulador
+        loop(tail, nuevoAcumulador)
+    }
+
+    loop(lOc, Nil)
+
   }
+
+
 
   def anagramasDeFrase(sentence: Frase): List[Frase] = {
     // usar expresiones for y funciones auxiliares
-    ???
+    val ocurrenciasFrase = lOcFrase(sentence)
+
+    // Función auxiliar para transformar ocurrencias en una palabra cualquiera con esas letras
+    def ocurrenciasAString(oc: Ocurrencias): Palabra = {
+      oc.flatMap { case (char, count) =>
+        (1 to count).map(_ => char)
+      }.mkString
+    }
+
+    // Función recursiva que genera todos los anagramas posibles
+    def aux(oc: Ocurrencias): List[Frase] = {
+      if (oc.isEmpty) List(Nil)
+      else {
+        for {
+          sub <- combinaciones(oc) if sub.nonEmpty
+          palabra <- anagramasDePalabra(ocurrenciasAString(sub)) // usamos la función anagramasDePalabra
+          resto <- aux(complemento(oc, sub))
+        } yield palabra :: resto
+      }
+    }
+
+    aux(ocurrenciasFrase)
   }
 }
