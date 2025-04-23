@@ -15,9 +15,6 @@ package object Anagramas {
           .groupBy(c => c)
           .map{case (letra, ocurrencia) => (letra,ocurrencia.length)}
           .toList;
-
-    /*(for {(letra, ocurrencia) <- p.toList.groupBy(c => c)} yield (letra, ocurrencia.length)).toList
-     */
   }
 
   def lOcFrase(f: Frase): Ocurrencias = {
@@ -27,7 +24,7 @@ package object Anagramas {
 
   lazy val diccionarioPorOcurrencias: Map[Ocurrencias, List[Palabra]] = {
     // usar groupBy, lOcPal, ...
-    diccionario.groupBy(lOcPal)
+    diccionario.groupBy(x=>lOcPal(x).toSet).map(y => (y._1.toList,y._2))
   }
 
   def anagramasDePalabra(palabra: Palabra): List[Palabra] = {
@@ -47,7 +44,7 @@ package object Anagramas {
             else (caracter, n) :: combinacion
           } 
       }
-    }
+  }
 
   def complemento(lOc: Ocurrencias, slOc: Ocurrencias): Ocurrencias = {
     // usar recursión de cola
@@ -67,8 +64,6 @@ package object Anagramas {
     compIter(lOc, Nil)
 
   }
-
-
 
   def anagramasDeFrase(sentence: Frase): List[Frase] = {
     // usar expresiones for y funciones auxiliares
