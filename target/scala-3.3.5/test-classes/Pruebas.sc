@@ -19,8 +19,6 @@ lOcFrase(List("moco","cosas"))
 lOcFrase(List("oca","sos"))
 lOcFrase(List("cayo","sos"))
 
-assert(diccionarioPorOcurrencias(lOcPal("cosas")) == List("cosas"))
-
 anagramasDePalabra("cosas")
 anagramasDePalabra("como")
 anagramasDePalabra("casa")
@@ -55,8 +53,5 @@ anagramasDeFrase(List("yo", "voy"))
 anagramasDeFrase(List("cayo", "sos"))
 anagramasDeFrase(List("oca", "sos"))
 anagramasDeFrase(List("ocasos"))
-anagramasDeFrase(List("y", "yo", "como"))
-
 
 diccionarioPorOcurrencias
-

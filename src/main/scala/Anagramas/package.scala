@@ -67,24 +67,17 @@ package object Anagramas {
 
   def anagramasDeFrase(sentence: Frase): List[Frase] = {
     // usar expresiones for y funciones auxiliares
-    def ocurrenciasAString(oc: Ocurrencias): Palabra = {
-      val letrasRepetidas = for {
-        (letra, cantidad) <- oc
-        i <- 1 to cantidad
-      } yield letra
-
-      letrasRepetidas.mkString
-    }
     def aux(oc: Ocurrencias): List[Frase] = {
       if (oc.isEmpty) List(Nil)
       else {
         for {
-          sub <- combinaciones(oc) if sub.nonEmpty
-          palabra <- anagramasDePalabra(ocurrenciasAString(sub))
+          sub <- combinaciones(oc) 
+          palabra <- diccionarioPorOcurrencias.getOrElse(sub.reverse, Nil)
           resto <- aux(complemento(oc, sub))
         } yield palabra :: resto
       }
     }
     aux(lOcFrase(sentence))
   }
+
 }
