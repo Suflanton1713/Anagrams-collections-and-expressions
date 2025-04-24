@@ -18,22 +18,18 @@ package object Anagramas {
   }
 
   def lOcFrase(f: Frase): Ocurrencias = {
-    // usar lOcPal, mkString, ...
     lOcPal(f.mkString)
   }
 
   lazy val diccionarioPorOcurrencias: Map[Ocurrencias, List[Palabra]] = {
-    // usar groupBy, lOcPal, ...
     diccionario.groupBy(x=>lOcPal(x).toSet).map(y => (y._1.toList,y._2))
   }
 
   def anagramasDePalabra(palabra: Palabra): List[Palabra] = {
-    // usar diccionarioPorOcurrencias.get, lOcPal
     diccionarioPorOcurrencias.getOrElse(lOcPal(palabra), Nil);
   }
 
   def combinaciones(locurrencias: Ocurrencias): List[Ocurrencias] = {
-    // usar una expresión for para producir el resultado
       locurrencias.foldLeft(List(List.empty[(Char, Int)])) {
         case (combisPrevias, (caracter, cantidad)) =>
           for {
@@ -47,7 +43,6 @@ package object Anagramas {
   }
 
   def complemento(lOc: Ocurrencias, slOc: Ocurrencias): Ocurrencias = {
-    // usar recursión de cola
     @tailrec
     def compIter(restantes: Ocurrencias, acumulador: Ocurrencias): Ocurrencias = restantes match {
       case Nil => acumulador.reverse
@@ -60,18 +55,15 @@ package object Anagramas {
           else acumulador
         compIter(tail, nuevoAcumulador)
     }
-
     compIter(lOc, Nil)
-
   }
 
   def anagramasDeFrase(sentence: Frase): List[Frase] = {
-    // usar expresiones for y funciones auxiliares
     def aux(oc: Ocurrencias): List[Frase] = {
       if (oc.isEmpty) List(Nil)
       else {
         for {
-          sub <- combinaciones(oc) 
+          sub <- combinaciones(oc)
           palabra <- diccionarioPorOcurrencias.getOrElse(sub.reverse, Nil)
           resto <- aux(complemento(oc, sub))
         } yield palabra :: resto
@@ -79,5 +71,4 @@ package object Anagramas {
     }
     aux(lOcFrase(sentence))
   }
-
 }
